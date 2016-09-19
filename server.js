@@ -1,48 +1,16 @@
 var express = require('express');
+var bodyParser = require('body-parser');
+
 var app = express();
 var PORT = process.env.PORT || 8080;
-var product = [{
-	id: 1,
-	name:'Jeans',
-	description: 'Womens jeans in all shades ',
-	price : 2500-7000,
-	quantity : 50,
-	categeory  :11,
-	completed: false
-},{
-	id: 2,
-	name:'Tops',
-	description: 'Womens Tops ',
-	price : 500-7000,
-	quantity : 60,
-	categeory  :12,
-	completed: false
-},{
-	id: 3,
-	name:'Jewellery',
-	description: 'Womens Jewellery',
-	price : 500-7000,
-	quantity : 600,
-	categeory  :13,
-	completed: false
 
+var product = [];
+var producNextId = 1;
 
-}];
+var categeory =[];
+var categNextId = 1;
 
-var categeory =[{
-	id : 11,
-	name : 'Ethnic wear',
-	completed : false
-},{
-	id :12,
-	name : 'western wear',
-	completed :false
-},{
-	id :13,
-	name :'womens wear',
-	completed :false
-	
-}]
+app.use(bodyParser.json());
 
 
 app.get('/',function(req,res){
@@ -97,6 +65,38 @@ app.get('/categeory/:id',function(req,res){
 		res.status(404).send();
 	}
 	});
+
+
+//Post/product
+
+app.post('/product',function(req,res){
+
+	var body = req.body;
+
+	body.id = producNextId++;
+	
+
+	product.push(body);
+
+	res.json(body);
+});
+
+//Post/categeory
+
+app.post('/categeory',function(req,res){
+
+	var body = req.body;
+
+	body.id = categNextId++;
+	
+
+	categeory.push(body);
+
+	res.json(body);
+});
+
+
+
 
 app.listen(PORT,function(){
 	console.log('Express listening on port ' + PORT + '!');
