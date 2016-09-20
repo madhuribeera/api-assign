@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var _=require('underscore'); 
 
 var app = express();
 var PORT = process.env.PORT || 8080;
@@ -30,13 +31,9 @@ app.get('/categeory',function(req,res){
 //GET /product/:id
 app.get('/product/:id',function(req,res){
 		var todoId = parseInt(req.params.id);
-		var matchedTodo;
+		var matchedTodo = _.findWhere(product ,{id: todoId });
 
-	product.forEach(function(todo){
-		if(todoId === todo.id){
-			matchedTodo = todo;
-		}
-	});
+	
 
 	if(matchedTodo){
 		res.json(matchedTodo);
@@ -51,13 +48,10 @@ app.get('/product/:id',function(req,res){
 //GET /categeory/:id
 app.get('/categeory/:id',function(req,res){
 	var categId = parseInt(req.params.id);
-	var matchedcateg;
+	var matchedcateg = _.findWhere(categeory ,{id: categId});
 
-	categeory.forEach(function(todo){
-		if(categId === todo.id){
-			matchedcateg = todo;
-		}
-	});
+
+	
 
 	if(matchedcateg){
 		res.json(matchedcateg);
@@ -71,8 +65,13 @@ app.get('/categeory/:id',function(req,res){
 
 app.post('/product',function(req,res){
 
-	var body = req.body;
+	var body = _.pick(req.body, 'description' , 'completed');
 
+	if(!_.isBoolean(body.completed) || body.description.trim().length === 0){
+		return res.status(400).send();
+	}
+
+	body.description = body.description.trim();
 	body.id = producNextId++;
 	
 
