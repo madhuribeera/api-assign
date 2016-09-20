@@ -95,6 +95,24 @@ app.post('/categeory',function(req,res){
 });
 
 
+//DELETE /product/:id
+app.delete('/product/:id', function(req,res){
+	var todoId = parseInt(req.params.id,10);
+	var matchedTodo = _.findWhere(product,{ id: todoId});
+
+	if(!matchedTodo){
+		res.status(404).json({"error": "no todo found with that id"});
+	} else {
+		product = _.without(product,matchedTodo);
+		res.json(matchedTodo);
+	}
+});
+
+
+
+
+
+//DELETE /categeory/:id
 
 
 app.listen(PORT,function(){
