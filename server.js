@@ -1,5 +1,7 @@
 var express = require('express');
+
 var bodyParser = require('body-parser');
+
 var _=require('underscore'); 
 
 var app = express();
@@ -12,15 +14,29 @@ var categeory =[];
 var categNextId = 1;
 
 app.use(bodyParser.json());
+debugger;
 
 
 app.get('/',function(req,res){
 	res.send('E-commerce Stuff');
 });
 
-//GET /product
+//GET /product?completed =true
 app.get('/product',function(req,res){
-	res.json(product);
+	var queryParams =req.query;
+	var filteredTodos = product;
+
+
+	if(queryParams.hasOwnProperty('completed')&& queryParams.completed ==='true') {
+		filteredTodos = _.where(filteredTodos,{completed:true});
+	}else if(queryParams.hasOwnProperty('completed')&& queryParams.completed ==='false'){
+		filteredTodos = _.where(filteredTodos,{completed:false});
+	}
+
+	
+
+
+	res.json(filteredTodos);
 });
 
 //GET /categeory
@@ -33,9 +49,7 @@ app.get('/product/:id',function(req,res){
 		var todoId = parseInt(req.params.id);
 		var matchedTodo = _.findWhere(product ,{id: todoId });
 
-	
-
-	if(matchedTodo){
+		if(matchedTodo){
 		res.json(matchedTodo);
 	 } else {
 		res.status(404).send();
@@ -65,17 +79,19 @@ app.get('/categeory/:id',function(req,res){
 
 app.post('/product',function(req,res){
 
-	var body = _.pick(req.body, 'description' , 'completed');
+	var body = _.pick(req.body, 'id','Name','description', 'price', 'completed');
 
-	if(!_.isBoolean(body.completed) || body.description.trim().length === 0){
+	if(!_.isBoolean(body.completed) && body.description.trim().length > 0 && body.price != '' &&  body.Name.trim().length > 0)
+	{
 		return res.status(400).send();
 	}
 
 	body.description = body.description.trim();
 	body.id = producNextId++;
-	
+	//body.Name = body.Name.trim();
 
 	product.push(body);
+
 
 	res.json(body);
 });
@@ -113,6 +129,87 @@ app.delete('/product/:id', function(req,res){
 
 
 //DELETE /categeory/:id
+
+app.delete('/categeory/:id', function(req,res){
+	var todoId = parseInt(req.params.id,10);
+	var matchedTodo = _.findWhere(categeory,{ id: todoId});
+
+	if(!matchedTodo){
+		res.status(404).json({"error": "no todo found with that id"});
+	} else {
+		categeory = _.without(categeory,matchedTodo);
+		res.json(matchedTodo);
+	}
+
+});
+
+
+//PUT /product/:id
+
+
+	app.put('/product/:id', function(req,res){
+	var todoId = parseInt(req.params.id,10);
+	var matchedTodo = _.findWhere(product,{ id: todoId});
+	var body = _.pick(req.body, 'description' , 'completed');
+	var validAttributes = {};
+
+	if(!matchedTodo){
+		return res.status(404).send();
+	}
+
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+		validAttributes.completed = body.completed;
+	}
+   else if(body.hasOwnProperty('completed')){
+	return res.status(400).send();
+}
+
+	if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length >0)
+	{
+		validAttributes.description = body.description;
+	}
+ else if(body.hasOwnProperty('description')){
+	return res.status(400).send();
+}
+_.extend(matchedTodo,validAttributes);
+res.json(matchedTodo);
+});
+
+
+
+//PUT /categeory/:id
+
+app.put('/categeory/:id', function(req,res){
+	var todoId = parseInt(req.params.id,10);
+	var matchedTodo = _.findWhere(categeory,{ id: todoId});
+	var body = _.pick(req.body, 'id','description' , 'completed');
+	var validAttributes = {};
+
+	if(!matchedTodo){
+		return res.status(404).send();
+	}
+
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+		validAttributes.completed = body.completed;
+	}
+   else if(body.hasOwnProperty('completed')){
+	return res.status(400).send();
+}
+
+	if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length >0)
+	{
+		validAttributes.description = body.description;
+	}
+ else if(body.hasOwnProperty('description')){
+	return res.status(400).send();
+}
+_.extend(matchedTodo,validAttributes);
+res.json(matchedTodo);
+});
+
+
+
+
 
 
 app.listen(PORT,function(){
